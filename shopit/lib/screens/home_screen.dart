@@ -1,11 +1,7 @@
-// screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:postgres/postgres.dart';
-import '../utils/cart_manager.dart';
 import '../utils/db_utils.dart';
 import 'subcategory_screen.dart';
-
+import '../utils/barcode_scan.dart';
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -71,7 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
             child: GestureDetector(
-              onTap: () => scanBarcode(context),
+              onTap: () => BarcodeScanService.scanBarcode(context,(){setState(() {
+                  // Reload data or update UI if necessary
+                });}),
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
                 padding: const EdgeInsets.all(8.0),
@@ -198,9 +196,8 @@ class _HomeScreenState extends State<HomeScreen> {
               return Expanded(
                 child: Column(
                   children: [
-                    
                     Image.asset(
-                      'assets/placeholder.png', 
+                      'assets/placeholder.png',
                       width: MediaQuery.of(context).size.width * 0.45,
                       height: MediaQuery.of(context).size.width * 0.45,
                       fit: BoxFit.cover,
@@ -213,62 +210,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> scanBarcode(BuildContext context) async {
-    var result = await BarcodeScanner.scan(
-      options: ScanOptions(
-        useCamera: -1, // default camera
-        autoEnableFlash: false,
-        android: AndroidOptions(
-          aspectTolerance: 0.00,
-          useAutoFocus: true,
-        ),
-      ),
-    );
-
-    if (result.type == ResultType.Barcode) {
-      handleProductScan(result.rawContent, context);
-    } else if (result.type == ResultType.Error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Scanning Error: ${result.rawContent}')),
-      );
-    }
-  }
-
-  void handleProductScan(String barcode, BuildContext context) async {
-    final conn = await Connection.open(
-      Endpoint(
-        host: 'shopit-db.cjgagme48oci.eu-north-1.rds.amazonaws.com',
-        database: 'clever_shop',
-        username: 'master',
-        password: 'password',
-      ),
-      settings: ConnectionSettings(sslMode: SslMode.require),
-    );
-    try {
-      var result = await conn.execute(
-          Sql.named(
-              'SELECT * FROM public."Product" WHERE "productId" = @barcode'),
-          parameters: {'barcode': barcode});
-
-      if (result.isNotEmpty) {
-        String productId = result.first[0].toString();
-        CartManager.addItem(productId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Product added to cart!')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Product not found')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    } finally {
-      await conn.close();
-    }
   }
 }

@@ -1,21 +1,30 @@
-// screens/home_page.dart
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'catalogue_screen.dart';
+import 'cart_screen.dart';
 
 class HomePage extends StatefulWidget {
+  final int initialIndex;
+
+  HomePage({this.initialIndex = 0});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   static List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     CatalogueScreen(),
-    Text('Shopping Cart',
-        style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+    CartScreen(),
     Text('Profile',
         style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
   ];
@@ -79,6 +88,6 @@ class _HomePageState extends State<HomePage> {
                   : Colors.black.withOpacity(0.6)),
         ),
       ),
-    );  
+    );
   }
 }
