@@ -50,7 +50,7 @@ dev_dependencies:
   barcode_scan2: ^4.1.4
   shared_preferences: ^2.0.15
   geolocator: ^8.2.0
-  flutter_paypal: ^0.2.0
+  flutter_paypal_payment: ^1.0.6
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

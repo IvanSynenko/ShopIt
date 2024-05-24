@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:postgres/postgres.dart';
-import 'package:flutter_paypal/flutter_paypal.dart';
+import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 import '../utils/cart_manager.dart';
 import '../utils/barcode_scan.dart';
 import 'home_page.dart';
@@ -77,62 +77,66 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
-  void startCheckout() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) => UsePaypal(
-          sandboxMode: true,
-          clientId: "AXi6aZh0nn5BZMhx37_ZOC69Ws9ZB6Zaps9Wjk-SOnIUCgsM1fywwbTuROKcf1LrMv1G9cwtcKh-ZtLf",
-          secretKey: "EIwYNLrgFlzB7arvGLaBDmZMpWcRS0Ygq0sfr2ErYffwPdd6uOslY50laUxER9DdJ-cQ5nGhJPtmMMYV",
-          returnURL: "com.example.shopit",
-          cancelURL: "com.example.shopit",
-          transactions: [
-            {
-              "amount": {
-                "total": totalPrice.toStringAsFixed(2),
-                "currency": "USD",
-                "details": {
-                  "subtotal": totalPrice.toStringAsFixed(2),
-                  "shipping": '0',
-                  "shipping_discount": 0
-                }
-              },
-              "description": "Purchase from ShopIt",
-              "item_list": {
-                "items": cartDetails.entries.map((entry) {
-                  return {
-                    "name": entry.value['name'],
-                    "quantity": entry.value['quantity'],
-                    "price": entry.value['price'].toStringAsFixed(2),
-                    "currency": "USD"
-                  };
-                }).toList(),
+  void startPaypalCheckout(double totalPrice) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (BuildContext context) => PaypalCheckoutView(
+        sandboxMode: true,
+        clientId: "AXi6aZh0nn5BZMhx37_ZOC69Ws9ZB6Zaps9Wjk-SOnIUCgsM1fywwbTuROKcf1LrMv1G9cwtcKh-ZtLf",
+        secretKey: "EIwYNLrgFlzB7arvGLaBDmZMpWcRS0Ygq0sfr2ErYffwPdd6uOslY50laUxER9DdJ-cQ5nGhJPtmMMYV",
+        transactions: [
+          {
+            "amount": {
+              "total": totalPrice.toStringAsFixed(2),
+              "currency": "USD",
+              "details": {
+                "subtotal": totalPrice.toStringAsFixed(2),
+                "shipping": '0',
+                "shipping_discount": 0
               }
+            },
+            "description": "The payment transaction description.",
+            "item_list": {
+              "items": cartDetails.entries.map((entry) {
+                return {
+                  "name": entry.value['name'],
+                  "quantity": entry.value['quantity'],
+                  "price": entry.value['price'].toString(),
+                  "currency": "USD"
+                };
+              }).toList(),
             }
-          ],
-          note: "Contact us for any questions on your order.",
-          onSuccess: (Map params) async {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Payment Successful!')),
-            );
-            print("onSuccess: $params");
-            // Clear the cart or update order status as needed
-          },
-          onError: (error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Payment Error: $error')),
-            );
-            print("onError: $error");
-          },
-          onCancel: (params) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Payment Cancelled')),
-            );
-            print('cancelled: $params');
-          },
-        ),
+          }
+        ],
+        note: "Contact us for any questions on your order.",
+        onSuccess: (Map params) async {
+          print("onSuccess: $params");
+          CartManager.clearCart(); // Clear the cart
+          setState(() {
+            cartDetails.clear();
+          });
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Payment successful!')),
+          );
+          //Add database update for orders, product quantity, pdf receipt formation
+        },
+
+        onError: (error) {
+          print("onError: $error");
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Payment error: $error')),
+          );
+        },
+        onCancel: () {
+          print('cancelled:');
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Payment cancelled')),
+          );
+        },
       ),
-    );
+    ));
   }
 
   @override
@@ -330,7 +334,9 @@ class _CartScreenState extends State<CartScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-            onPressed: startCheckout,
+            onPressed: () {
+              startPaypalCheckout(totalPrice);
+            },
             child: Text('Checkout', style: TextStyle(color: Colors.white)),
           ),
         ),
