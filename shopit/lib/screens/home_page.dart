@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'catalogue_screen.dart';
 import 'cart_screen.dart';
+import 'profile_screen.dart';
 
 class HomePage extends StatefulWidget {
   final int initialIndex;
-
   HomePage({this.initialIndex = 0});
 
   @override
@@ -25,8 +25,7 @@ class _HomePageState extends State<HomePage> {
     HomeScreen(),
     CatalogueScreen(),
     CartScreen(),
-    Text('Profile',
-        style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -45,8 +44,8 @@ class _HomePageState extends State<HomePage> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: Container(
-        color: Colors.pink[100], // Lighter pink background
-        height: 60, // Adjust the height to your preference
+        color: Colors.pink[100], 
+        height: 60, 
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(4, (index) => buildTabItem(index)),
@@ -77,8 +76,8 @@ class _HomePageState extends State<HomePage> {
       child: InkWell(
         onTap: () => _onItemTapped(index),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 250), // Duration of the animation
-          curve: Curves.easeInOut, // Type of animation curve
+          duration: Duration(milliseconds: 250), 
+          curve: Curves.easeInOut, 
           color:
               index == _selectedIndex ? Colors.pink[300] : Colors.transparent,
           alignment: Alignment.center,

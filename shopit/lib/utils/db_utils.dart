@@ -1,4 +1,5 @@
-// utils/db_utils.dart
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:postgres/postgres.dart';
 
 class DatabaseUtils {
@@ -32,9 +33,9 @@ class DatabaseUtils {
   static Future<List<Map<String, dynamic>>> fetchSubcategories(
       String categoryId) async {
     final conn = await connect();
-    var results = await conn.execute(Sql.named(
-          'SELECT "subcategoryId", "subcategoryName" FROM public."Subcategory" WHERE "categorySubcategoryId" = @categoryId')
-      ,
+    var results = await conn.execute(
+      Sql.named(
+          'SELECT "subcategoryId", "subcategoryName" FROM public."Subcategory" WHERE "categorySubcategoryId" = @categoryId'),
       parameters: {'categoryId': categoryId},
     );
     await conn.close();
@@ -49,9 +50,9 @@ class DatabaseUtils {
   static Future<List<Map<String, dynamic>>> fetchProducts(
       String subcategoryId) async {
     final conn = await connect();
-    var results = await conn.execute(Sql.named(
-          'SELECT "productId", "productName", "productDescription", "productBrand", "price" FROM public."Product" WHERE "subcategoryId" = @subcategoryId')
-      ,
+    var results = await conn.execute(
+      Sql.named(
+          'SELECT "productId", "productName", "productDescription", "productBrand", "price" FROM public."Product" WHERE "subcategoryId" = @subcategoryId'),
       parameters: {'subcategoryId': subcategoryId},
     );
     await conn.close();
@@ -64,5 +65,39 @@ class DatabaseUtils {
               'price': row[4],
             })
         .toList();
+  }
+
+  static String hashPassword(String password) {
+    var bytes = utf8.encode(password); 
+    var digest = sha256.convert(bytes); 
+    return digest.toString(); 
+  }
+
+  static Future<void> registerNewUser({
+    required String userId,
+    required String email,
+    required String name,
+    required String surname,
+    required String phoneNumber,
+    required String password,
+  }) async {
+    final conn = await connect();
+    try {
+      String hashedPassword = hashPassword(password); 
+
+      await conn.execute(
+        Sql.named(
+            'INSERT INTO public."User" ("userId", "userEmail", "userName", "userPassword", "userPhoneNumber") VALUES (@userId, @userEmail, @userName, @userPassword, @userPhoneNumber)'),
+        parameters: {
+          'userId': userId,
+          'userEmail': email,
+          'userName': '$name $surname',
+          'userPassword': hashedPassword, 
+          'userPhoneNumber': phoneNumber,
+        },
+      );
+    } finally {
+      await conn.close();
+    }
   }
 }

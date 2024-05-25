@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/db_utils.dart';
 import 'subcategory_screen.dart';
 import '../utils/barcode_scan.dart';
+import 'home_page.dart';
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -9,10 +11,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> mostBoughtCategories = [];
+  User? user;
 
   @override
   void initState() {
     super.initState();
+    user = FirebaseAuth.instance.currentUser;
     loadMostBoughtCategories();
   }
 
@@ -67,9 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
             child: GestureDetector(
-              onTap: () => BarcodeScanService.scanBarcode(context,(){setState(() {
+              onTap: () => BarcodeScanService.scanBarcode(context, () {
+                setState(() {
                   // Reload data or update UI if necessary
-                });}),
+                });
+              }),
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
                 padding: const EdgeInsets.all(8.0),
@@ -126,26 +132,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, color: Colors.purple),
-                      SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              child: user != null
+                  ? GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomePage(initialIndex: 1)),
+                        );
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Order',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('Order items online'),
+                          Row(
+                            children: [
+                              Icon(Icons.location_on, color: Colors.purple),
+                              SizedBox(width: 8),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Order',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  Text('Order items online'),
+                                ],
+                              ),
+                            ],
+                          ),
+                          Icon(Icons.arrow_forward_ios, color: Colors.grey),
                         ],
                       ),
-                    ],
-                  ),
-                  Icon(Icons.arrow_forward_ios, color: Colors.grey),
-                ],
-              ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Text(
+                        'Sign in to order online and participate in the bonus program',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
             ),
           ),
           Divider(color: Colors.black),
