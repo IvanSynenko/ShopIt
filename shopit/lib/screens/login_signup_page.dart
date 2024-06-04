@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import '../utils/google_sign_in.dart';
+import 'home_page.dart';
 import 'signup_page.dart';
 import 'login_page.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 class LoginSignupPage extends StatelessWidget {
+  final GoogleSignInProvider _googleSignInProvider = GoogleSignInProvider();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,14 +105,47 @@ class LoginSignupPage extends StatelessWidget {
             ),
             SizedBox(height: 40), // Increased space
             ElevatedButton.icon(
-              onPressed: () {
-                // Implement Google login functionality
+              onPressed: () async {
+                var googleSignInData =
+                    await _googleSignInProvider.signInWithGoogle();
+                if (googleSignInData != null) {
+                  String? email = googleSignInData['email'];
+                  bool exists = await _googleSignInProvider.userExists(email!);
+                  if (exists) {
+                    final AuthCredential credential =
+                        GoogleAuthProvider.credential(
+                      accessToken: googleSignInData['accessToken'],
+                      idToken: googleSignInData['idToken'],
+                    );
+
+                    await FirebaseAuth.instance
+                        .signInWithCredential(credential);
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HomePage(initialIndex: 3)),
+                    );
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SignUpPage(email: email),
+                      ),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                            Text('Google sign-in failed. Please try again.')),
+                  );
+                }
               },
               icon: Icon(Icons.login, color: Colors.white),
               label: Text('Log in with Google'),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black,
-                backgroundColor: Colors.grey[300],
+                foregroundColor: Colors.black, backgroundColor: Colors.grey[300],
               ),
             ),
           ],

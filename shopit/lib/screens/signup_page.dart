@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:postgres/postgres.dart';
 import '../utils/db_utils.dart';
 import 'home_page.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 
 class SignUpPage extends StatefulWidget {
+  final String? email;
+
+  SignUpPage({this.email});
+
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -20,6 +25,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.email != null) {
+      _emailController.text = widget.email!;
+    }
+  }
+
   Future<void> _signUpUser() async {
     setState(() {
       _isLoading = true;
@@ -32,8 +45,8 @@ class _SignUpPageState extends State<SignUpPage> {
       );
 
       final conn = await DatabaseUtils.connect();
-      await conn.execute(
-        'INSERT INTO public."User"("userId", "userEmail", "userName", "userPassword", "userPhoneNumber") VALUES (@userId, @userEmail, @userName, @userPassword, @userPhoneNumber)',
+      await conn.execute(Sql.named(
+        'INSERT INTO public."User"("userId", "userEmail", "userName", "userPassword", "userPhoneNumber") VALUES (@userId, @userEmail, @userName, @userPassword, @userPhoneNumber)'),
         parameters: {
           'userId': userCredential.user?.uid,
           'userEmail': _emailController.text,
@@ -93,6 +106,8 @@ class _SignUpPageState extends State<SignUpPage> {
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(labelText: 'Email'),
+                      readOnly: widget.email !=
+                          null, // Make the email field read-only if pre-filled
                     ),
                     TextField(
                       controller: _phoneController,
