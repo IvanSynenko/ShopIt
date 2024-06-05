@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../utils/db_utils.dart';
 import '../widgets/category_item.dart';
 import 'subcategory_screen.dart';
+import 'product_list_screen.dart';
 
 class CatalogueScreen extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class CatalogueScreen extends StatefulWidget {
 
 class _CatalogueScreenState extends State<CatalogueScreen> {
   List<Map<String, dynamic>> categories = [];
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -21,6 +23,21 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
   void loadCategories() async {
     categories = await DatabaseUtils.fetchCategories();
     setState(() {});
+  }
+
+  void searchProducts(String query) async {
+    if (query.isNotEmpty) {
+      var results = await DatabaseUtils.searchProducts(query);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductListScreen(
+            subcategoryId: '',
+            searchResults: results,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -49,7 +66,20 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
                   children: [
                     Icon(Icons.search),
                     SizedBox(width: 8),
-                    Text('Search for goods'),
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search for goods',
+                          border: InputBorder.none,
+                        ),
+                        onSubmitted: searchProducts,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.search),
+                      onPressed: () => searchProducts(searchController.text),
+                    ),
                   ],
                 ),
               ),
@@ -67,7 +97,8 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => SubCategoryScreen(
-                            categoryId: category['categoryId']),
+                          categoryId: category['categoryId'],
+                        ),
                       ),
                     );
                   },

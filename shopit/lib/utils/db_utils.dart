@@ -50,7 +50,40 @@ class DatabaseUtils {
             })
         .toList();
   }
+    static Future<List<Map<String, dynamic>>> searchProducts(String query) async {
+    final conn = await connect();
+    var results = await conn.execute(
+      Sql.named(
+          'SELECT "productId", "productName", "productDescription", "productBrand", "price" FROM public."Product" WHERE LOWER("productName") LIKE LOWER(@query)'),
+      parameters: {'query': '%$query%'},
+    );
+    await conn.close();
+    return results
+        .map((row) => {
+              'productId': row[0],
+              'productName': row[1],
+              'productDescription': row[2],
+              'productBrand': row[3],
+              'price': row[4],
+            })
+        .toList();
+  }
 
+  static List<Map<String, dynamic>> sortProductsByPrice(
+      List<Map<String, dynamic>> products, bool ascending) {
+    products.sort((a, b) => ascending
+        ? a['price'].compareTo(b['price'])
+        : b['price'].compareTo(a['price']));
+    return products;
+  }
+
+  static List<Map<String, dynamic>> filterProductsByPrice(
+      List<Map<String, dynamic>> products, double minPrice, double maxPrice) {
+    return products
+        .where((product) =>
+            double.parse(product['price']) >= minPrice && double.parse(product['price']) <= maxPrice)
+        .toList();
+  }
   static Future<List<Map<String, dynamic>>> fetchSubcategories(
       String categoryId) async {
     final conn = await connect();

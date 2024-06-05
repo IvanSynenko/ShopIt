@@ -4,6 +4,7 @@ import '../utils/db_utils.dart';
 import 'subcategory_screen.dart';
 import '../utils/barcode_scan.dart';
 import 'home_page.dart';
+import 'product_list_screen.dart';
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -11,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> mostBoughtCategories = [];
+  TextEditingController searchController = TextEditingController();
   User? user;
 
   @override
@@ -19,7 +21,20 @@ class _HomeScreenState extends State<HomeScreen> {
     user = FirebaseAuth.instance.currentUser;
     loadMostBoughtCategories();
   }
-
+void searchProducts(String query) async {
+    if (query.isNotEmpty) {
+      var results = await DatabaseUtils.searchProducts(query);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductListScreen(
+            subcategoryId: '',
+            searchResults: results,
+          ),
+        ),
+      );
+    }
+  }
   void loadMostBoughtCategories() async {
     List<Map<String, dynamic>> categories =
         await DatabaseUtils.fetchCategories();
@@ -60,9 +75,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.search),
-                  SizedBox(width: 8),
-                  Text('Search for goods'),
+                  Expanded(
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search for goods',
+                        border: InputBorder.none,
+                      ),
+                      onSubmitted: searchProducts,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () => searchProducts(searchController.text),
+                  )
                 ],
               ),
             ),

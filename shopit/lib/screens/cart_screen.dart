@@ -1,4 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:share/share.dart';
 import 'package:postgres/postgres.dart';
 import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -125,19 +130,17 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
-  void startPaypalCheckout(double totalPrice) {
+  void startPaypalCheckout(double totalPrice) async {
     User? user = FirebaseAuth.instance.currentUser;
+    String userId = user?.uid ?? 'notregistered';
+    String receiver = user?.displayName ?? 'notregistered';
+    String receiverPhone = user?.phoneNumber ?? 'notregistered';
 
-    if (user != null) {
-      // Navigate to configure order screen
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ConfigureOrderScreen(
-          totalPrice: totalPrice,
-          cartDetails: cartDetails,
-        ),
-      ));
-    } else {
-      // Proceed with the existing PayPal checkout for local cart
+    final conn = await DatabaseUtils.connect();
+    try {
+      
+
+      // Proceed with PayPal checkout
       Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context) => PaypalCheckoutView(
           sandboxMode: true,
@@ -172,7 +175,6 @@ class _CartScreenState extends State<CartScreen> {
           note: "Contact us for any questions on your order.",
           onSuccess: (Map params) async {
             print("onSuccess: $params");
-            CartManager.clearCart(); // Clear the cart
             setState(() {
               cartDetails.clear();
             });
@@ -180,7 +182,55 @@ class _CartScreenState extends State<CartScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Payment successful!')),
             );
-            // Add database update for orders, product quantity, pdf receipt formation
+            // Insert order
+            var orderIdResult = await conn.execute(
+              Sql.named(
+                  'INSERT INTO public."Order"("orderId", "userOrderId", "orderDate", "receiver", "receiverPhone", "paymentMethod") VALUES (gen_random_uuid(), @userId, CURRENT_TIMESTAMP, @receiver, @receiverPhone, @paymentMethod) RETURNING "orderId"'),
+              parameters: {
+                'userId': userId,
+                'receiver': receiver,
+                'receiverPhone': receiverPhone,
+                'paymentMethod': 'NOW',
+              },
+            );
+
+            var orderId = orderIdResult.first[0].toString();
+
+            // Insert order products and update product quantities
+            for (var entry in cartDetails.entries) {
+              String productId = entry.key;
+              int quantity = entry.value['quantity'];
+
+              // Insert into OrderProductQuantity
+              await conn.execute(
+                Sql.named(
+                    'INSERT INTO public."OrderProductQuantity"("orderProductQuantityId", "orderProductId", "orderProductQuantityProductId", "productQuantity") VALUES (gen_random_uuid(), @orderId, @productId, @quantity)'),
+                parameters: {
+                  'orderId': orderId,
+                  'productId': productId,
+                  'quantity': quantity,
+                },
+              );
+
+              // Update product quantity in ProductShop
+              await conn.execute(
+                Sql.named(
+                    'UPDATE public."ProductShop" SET "productQuantity" = "productQuantity" - @quantity WHERE "productId" = @productId'),
+                parameters: {
+                  'quantity': quantity,
+                  'productId': productId,
+                },
+              );
+            }
+
+            // Clear the cart after order is placed
+            await CartManager.clearCart(isLocal: true);
+            setState(() {
+              cartDetails.clear();
+            });
+            // Generate and share PDF receipt
+            await generateAndSharePdfReceipt();
+
           },
           onError: (error) {
             print("onError: $error");
@@ -198,7 +248,65 @@ class _CartScreenState extends State<CartScreen> {
           },
         ),
       ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    } finally {
+      await conn.close();
     }
+  }
+
+  Future<void> generateAndSharePdfReceipt() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('Receipt', style: pw.TextStyle(fontSize: 24)),
+              pw.SizedBox(height: 16),
+              pw.Text('Thank you for your purchase!'),
+              pw.SizedBox(height: 16),
+              pw.Text('Order Details:'),
+              pw.SizedBox(height: 8),
+              pw.TableHelper.fromTextArray(
+                context: context,
+                data: <List<String>>[
+                  <String>['Product', 'Quantity', 'Price'],
+                  ...cartDetails.entries.map((entry) {
+                    return [
+                      entry.value['name'] as String,
+                      entry.value['quantity'].toString(),
+                      '\$${(entry.value['price'] * entry.value['quantity']).toStringAsFixed(2)}',
+                    ];
+                  }).toList(),
+                ],
+              ),
+              pw.SizedBox(height: 16),
+              pw.Text('Total: \$${totalPrice.toStringAsFixed(2)}'),
+            ],
+          );
+        },
+      ),
+    );
+
+    final output = await getTemporaryDirectory();
+    final file = File('${output.path}/receipt.pdf');
+    await file.writeAsBytes(await pdf.save());
+
+    Share.shareFiles([file.path], text: 'Here is your receipt');
+  }
+
+  void proceedToConfigureOrder() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => ConfigureOrderScreen(
+        totalPrice: totalPrice,
+        cartDetails: cartDetails,
+      ),
+    ));
   }
 
   @override
@@ -413,7 +521,7 @@ class _CartScreenState extends State<CartScreen> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
             onPressed: () {
-              startPaypalCheckout(totalPrice);
+              proceedToConfigureOrder();
             },
             child: Text('Checkout', style: TextStyle(color: Colors.white)),
           ),

@@ -14,6 +14,7 @@ class SubCategoryScreen extends StatefulWidget {
 
 class _SubCategoryScreenState extends State<SubCategoryScreen> {
   List<Map<String, dynamic>> subcategories = [];
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -24,6 +25,21 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
   void loadSubcategories() async {
     subcategories = await DatabaseUtils.fetchSubcategories(widget.categoryId);
     setState(() {});
+  }
+
+  void searchProducts(String query) async {
+    if (query.isNotEmpty) {
+      var results = await DatabaseUtils.searchProducts(query);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductListScreen(
+            subcategoryId: '',
+            searchResults: results,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -49,7 +65,20 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                   children: [
                     Icon(Icons.search),
                     SizedBox(width: 8),
-                    Text('Search for goods'),
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search for goods',
+                          border: InputBorder.none,
+                        ),
+                        onSubmitted: searchProducts,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.search),
+                      onPressed: () => searchProducts(searchController.text),
+                    ),
                   ],
                 ),
               ),
@@ -63,7 +92,8 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ProductListScreen(
-                          subcategoryId: subcategory['subcategoryId']),
+                        subcategoryId: subcategory['subcategoryId'],
+                      ),
                     ),
                   );
                 },
