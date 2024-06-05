@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:postgres/postgres.dart';
 import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/cart_manager.dart';
 import '../utils/barcode_scan.dart';
 import 'home_page.dart';
+import 'configure_order_screen.dart';
+import '../utils/db_utils.dart';
 
 class CartScreen extends StatefulWidget {
   @override
@@ -26,29 +29,34 @@ class _CartScreenState extends State<CartScreen> {
       isLoading = true;
     });
 
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // Load online cart
+      await loadOnlineCart(user.uid);
+    } else {
+      // Load local cart
+      await loadLocalCart();
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> loadLocalCart() async {
     Map<String, int> cartItems = CartManager.getCartItems();
     if (cartItems.isEmpty) {
-      setState(() {
-        isLoading = false;
-      });
       return;
     }
 
-    final conn = await Connection.open(
-      Endpoint(
-        host: 'shopit-db.cjgagme48oci.eu-north-1.rds.amazonaws.com',
-        database: 'clever_shop',
-        username: 'master',
-        password: 'password',
-      ),
-      settings: ConnectionSettings(sslMode: SslMode.require),
-    );
+    final conn = await DatabaseUtils.connect();
 
     try {
       for (String productId in cartItems.keys) {
-        var result = await conn.execute(Sql.named(
-              'SELECT "productName", "price" FROM public."Product" WHERE "productId" = @productId')
-          ,
+        var result = await conn.execute(
+          Sql.named(
+              'SELECT "productName", "price" FROM public."Product" WHERE "productId" = @productId'),
           parameters: {'productId': productId},
         );
 
@@ -71,72 +79,126 @@ class _CartScreenState extends State<CartScreen> {
       );
     } finally {
       await conn.close();
-      setState(() {
-        isLoading = false;
-      });
+    }
+  }
+
+  Future<void> loadOnlineCart(String userId) async {
+    final conn = await DatabaseUtils.connect();
+
+    try {
+      var result = await conn.execute(
+        Sql.named(
+            'SELECT "productId", "productQuantity" FROM public."UsersProductQuantity" WHERE "userId" = @userId'),
+        parameters: {'userId': userId},
+      );
+
+      for (var row in result) {
+        String productId = row[0] as String;
+        int quantity = row[1] as int;
+
+        var productResult = await conn.execute(
+          Sql.named(
+              'SELECT "productName", "price" FROM public."Product" WHERE "productId" = @productId'),
+          parameters: {'productId': productId},
+        );
+
+        if (productResult.isNotEmpty) {
+          cartDetails[productId] = {
+            'name': productResult.first[0],
+            'price': double.parse(productResult.first[1].toString()),
+            'quantity': quantity,
+          };
+        }
+      }
+
+      totalPrice = cartDetails.entries
+          .map((entry) => entry.value['price'] * entry.value['quantity'])
+          .fold(0.0, (prev, amount) => prev + amount);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Error loading online cart details: ${e.toString()}')),
+      );
+    } finally {
+      await conn.close();
     }
   }
 
   void startPaypalCheckout(double totalPrice) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (BuildContext context) => PaypalCheckoutView(
-        sandboxMode: true,
-        clientId: "AXi6aZh0nn5BZMhx37_ZOC69Ws9ZB6Zaps9Wjk-SOnIUCgsM1fywwbTuROKcf1LrMv1G9cwtcKh-ZtLf",
-        secretKey: "EIwYNLrgFlzB7arvGLaBDmZMpWcRS0Ygq0sfr2ErYffwPdd6uOslY50laUxER9DdJ-cQ5nGhJPtmMMYV",
-        transactions: [
-          {
-            "amount": {
-              "total": totalPrice.toStringAsFixed(2),
-              "currency": "USD",
-              "details": {
-                "subtotal": totalPrice.toStringAsFixed(2),
-                "shipping": '0',
-                "shipping_discount": 0
-              }
-            },
-            "description": "The payment transaction description.",
-            "item_list": {
-              "items": cartDetails.entries.map((entry) {
-                return {
-                  "name": entry.value['name'],
-                  "quantity": entry.value['quantity'],
-                  "price": entry.value['price'].toString(),
-                  "currency": "USD"
-                };
-              }).toList(),
-            }
-          }
-        ],
-        note: "Contact us for any questions on your order.",
-        onSuccess: (Map params) async {
-          print("onSuccess: $params");
-          CartManager.clearCart(); // Clear the cart
-          setState(() {
-            cartDetails.clear();
-          });
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Payment successful!')),
-          );
-          //Add database update for orders, product quantity, pdf receipt formation
-        },
+    User? user = FirebaseAuth.instance.currentUser;
 
-        onError: (error) {
-          print("onError: $error");
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Payment error: $error')),
-          );
-        },
-        onCancel: () {
-          print('cancelled:');
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Payment cancelled')),
-          );
-        },
-      ),
-    ));
+    if (user != null) {
+      // Navigate to configure order screen
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ConfigureOrderScreen(
+          totalPrice: totalPrice,
+          cartDetails: cartDetails,
+        ),
+      ));
+    } else {
+      // Proceed with the existing PayPal checkout for local cart
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (BuildContext context) => PaypalCheckoutView(
+          sandboxMode: true,
+          clientId:
+              "AXi6aZh0nn5BZMhx37_ZOC69Ws9ZB6Zaps9Wjk-SOnIUCgsM1fywwbTuROKcf1LrMv1G9cwtcKh-ZtLf",
+          secretKey:
+              "EIwYNLrgFlzB7arvGLaBDmZMpWcRS0Ygq0sfr2ErYffwPdd6uOslY50laUxER9DdJ-cQ5nGhJPtmMMYV",
+          transactions: [
+            {
+              "amount": {
+                "total": totalPrice.toStringAsFixed(2),
+                "currency": "USD",
+                "details": {
+                  "subtotal": totalPrice.toStringAsFixed(2),
+                  "shipping": '0',
+                  "shipping_discount": 0
+                }
+              },
+              "description": "The payment transaction description.",
+              "item_list": {
+                "items": cartDetails.entries.map((entry) {
+                  return {
+                    "name": entry.value['name'],
+                    "quantity": entry.value['quantity'],
+                    "price": entry.value['price'].toString(),
+                    "currency": "USD"
+                  };
+                }).toList(),
+              }
+            }
+          ],
+          note: "Contact us for any questions on your order.",
+          onSuccess: (Map params) async {
+            print("onSuccess: $params");
+            CartManager.clearCart(); // Clear the cart
+            setState(() {
+              cartDetails.clear();
+            });
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Payment successful!')),
+            );
+            // Add database update for orders, product quantity, pdf receipt formation
+          },
+          onError: (error) {
+            print("onError: $error");
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Payment error: $error')),
+            );
+          },
+          onCancel: () {
+            print('cancelled:');
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Payment cancelled')),
+            );
+          },
+        ),
+      ));
+    }
   }
 
   @override
@@ -261,10 +323,14 @@ class _CartScreenState extends State<CartScreen> {
                                         fontWeight: FontWeight.bold)),
                                 IconButton(
                                   icon: Icon(Icons.delete),
-                                  onPressed: () {
+                                  onPressed: () async {
+                                    await CartManager.deleteItem(productId,
+                                        isLocal:
+                                            FirebaseAuth.instance.currentUser ==
+                                                null);
                                     setState(() {
-                                      CartManager.removeItem(productId);
                                       cartDetails.remove(productId);
+                                      loadCartDetails();
                                     });
                                   },
                                 ),
@@ -277,15 +343,24 @@ class _CartScreenState extends State<CartScreen> {
                                   children: [
                                     IconButton(
                                       icon: Icon(Icons.remove),
-                                      onPressed: () {
+                                      onPressed: () async {
+                                        await CartManager.removeItem(productId,
+                                            isLocal: FirebaseAuth
+                                                    .instance.currentUser ==
+                                                null);
                                         setState(() {
-                                          CartManager.removeItem(productId);
-                                          if (CartManager.getCartItems()[
-                                                      productId] ==
-                                                  null ||
-                                              CartManager.getCartItems()[
-                                                      productId]! <=
-                                                  0) {
+                                          if (FirebaseAuth.instance
+                                                          .currentUser ==
+                                                      null &&
+                                                  CartManager.getCartItems()[
+                                                          productId] ==
+                                                      null ||
+                                              FirebaseAuth.instance
+                                                          .currentUser !=
+                                                      null &&
+                                                  cartDetails[productId]
+                                                          ?['quantity'] ==
+                                                      0) {
                                             cartDetails.remove(productId);
                                           }
                                           loadCartDetails(); // Refresh cart details
@@ -295,9 +370,12 @@ class _CartScreenState extends State<CartScreen> {
                                     Text(item['quantity'].toString()),
                                     IconButton(
                                       icon: Icon(Icons.add),
-                                      onPressed: () {
+                                      onPressed: () async {
+                                        await CartManager.addItem(productId,
+                                            isLocal: FirebaseAuth
+                                                    .instance.currentUser ==
+                                                null);
                                         setState(() {
-                                          CartManager.addItem(productId);
                                           loadCartDetails(); // Refresh cart details
                                         });
                                       },

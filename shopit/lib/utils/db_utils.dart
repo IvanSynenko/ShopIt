@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:postgres/postgres.dart';
-
+import 'package:geolocator/geolocator.dart';
 class DatabaseUtils {
   static Future<Connection> connect() async {
     final conn = await Connection.open(
@@ -16,7 +16,28 @@ class DatabaseUtils {
 
     return conn;
   }
+  static Future<List<Map<String, dynamic>>> fetchStoresWithinRadius(
+      double latitude, double longitude, double radius) async {
+    final conn = await connect();
+    var results = await conn.execute(
+      Sql.named(
+          'SELECT "shopId", "location", "shopAddress" FROM public."Shop" WHERE ST_DWithin("location", ST_SetSRID(ST_MakePoint(@longitude, @latitude), 4326)::geography, @radius)'),
+      parameters: {
+        'latitude': latitude,
+        'longitude': longitude,
+        'radius': radius * 1000, // Convert km to meters
+      },
+    );
+    await conn.close();
 
+    return results.map((row) {
+      return {
+        'shopId': row[0],
+        'location': row[1],
+        'shopAddress': row[2],
+      };
+    }).toList();
+  }
   static Future<List<Map<String, dynamic>>> fetchCategories() async {
     final conn = await connect();
     var results = await conn

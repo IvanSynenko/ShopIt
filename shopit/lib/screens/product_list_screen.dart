@@ -1,4 +1,3 @@
-// screens/product_list_screen.dart
 import 'package:flutter/material.dart';
 import '../utils/db_utils.dart';
 import '../widgets/product_item.dart';
@@ -36,7 +35,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.9,
                 padding: const EdgeInsets.all(8.0),
@@ -74,16 +74,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
               child: Column(
                 children: products.map((product) {
                   return ProductItem(
                     title: product['productName'],
-                    image: 'assets/placeholder.png', 
+                    image: 'assets/placeholder.png',
                     price: '\$${product['price']}',
-                                        onTap: () {
-                      // Add to cart functionality
-                    },
+                    productId: product['productId'],
                   );
                 }).toList(),
               ),
@@ -94,4 +93,3 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 }
-

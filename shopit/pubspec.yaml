@@ -55,6 +55,8 @@ dev_dependencies:
   firebase_auth: ^4.19.6
   crypto: ^3.0.1
   google_sign_in: ^6.2.1
+  google_maps_flutter: ^2.6.1
+  geocoding: ^3.0.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
