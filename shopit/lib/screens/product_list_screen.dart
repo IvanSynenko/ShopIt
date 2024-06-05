@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import '../utils/db_utils.dart';
 import '../widgets/product_item.dart';
-import 'product_detail_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
   final String subcategoryId;
@@ -126,13 +125,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 children: products.map((product) {
                   return GestureDetector(
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushNamed(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => ProductDetailScreen(
-                            productId: product['productId'],
-                          ),
-                        ),
+                        '/productDetail',
+                        arguments: product['productId'],
                       );
                     },
                     child: ProductItem(

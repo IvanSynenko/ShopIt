@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:postgres/postgres.dart';
-import 'package:geolocator/geolocator.dart';
+
 class DatabaseUtils {
   static Future<Connection> connect() async {
     final conn = await Connection.open(

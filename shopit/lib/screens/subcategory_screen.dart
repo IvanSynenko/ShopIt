@@ -88,13 +88,10 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                 title: Text(subcategory['subcategoryName']),
                 trailing: Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushNamed(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => ProductListScreen(
-                        subcategoryId: subcategory['subcategoryId'],
-                      ),
-                    ),
+                    '/productList',
+                    arguments: subcategory['subcategoryId'],
                   );
                 },
               );

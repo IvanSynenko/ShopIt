@@ -3,6 +3,9 @@ import 'home_screen.dart';
 import 'catalogue_screen.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
+import 'subcategory_screen.dart';
+import 'product_list_screen.dart';
+import 'product_detail_screen.dart';
 
 class HomePage extends StatefulWidget {
   final int initialIndex;
@@ -34,18 +37,51 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Widget getCurrentScreen() {
+    if (_selectedIndex == 1 && Navigator.canPop(context)) {
+      return Navigator(
+        onGenerateRoute: (settings) {
+          WidgetBuilder builder;
+          switch (settings.name) {
+            case '/':
+              builder = (context) => CatalogueScreen();
+              break;
+            case '/subcategory':
+              builder = (context) => SubCategoryScreen(
+                    categoryId: settings.arguments as String,
+                  );
+              break;
+            case '/productList':
+              builder = (context) => ProductListScreen(
+                    subcategoryId: settings.arguments as String,
+                  );
+              break;
+            case '/productDetail':
+              builder = (context) => ProductDetailScreen(
+                    productId: settings.arguments as String,
+                  );
+              break;
+            default:
+              throw Exception('Invalid route: ${settings.name}');
+          }
+          return MaterialPageRoute(builder: builder);
+        },
+      );
+    } else {
+      return _widgetOptions.elementAt(_selectedIndex);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('ShopIt'),
       ),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
+      body: getCurrentScreen(),
       bottomNavigationBar: Container(
-        color: Colors.pink[100], 
-        height: 60, 
+        color: Colors.pink[100],
+        height: 60,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(4, (index) => buildTabItem(index)),
@@ -76,8 +112,8 @@ class _HomePageState extends State<HomePage> {
       child: InkWell(
         onTap: () => _onItemTapped(index),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 250), 
-          curve: Curves.easeInOut, 
+          duration: Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
           color:
               index == _selectedIndex ? Colors.pink[300] : Colors.transparent,
           alignment: Alignment.center,
