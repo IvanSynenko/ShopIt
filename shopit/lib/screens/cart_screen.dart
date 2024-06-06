@@ -34,13 +34,13 @@ class _CartScreenState extends State<CartScreen> {
     });
 
     User? user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
+    if(CartManager.getCartItems().isNotEmpty){
+      await loadLocalCart();
+    }else{
+      if (user != null) {
       // Load online cart
       await loadOnlineCart(user.uid);
-    } else {
-      // Load local cart
-      await loadLocalCart();
+    }
     }
 
     setState(() {
@@ -323,6 +323,10 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void proceedToConfigureOrder() {
+    if(CartManager.getCartItems().isNotEmpty){
+      startPaypalCheckout(totalPrice);
+      return;
+    }
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => ConfigureOrderScreen(
         totalPrice: totalPrice,
@@ -379,7 +383,10 @@ class _CartScreenState extends State<CartScreen> {
                 label: Text('Scan', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800],shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                 onPressed: () {
-                  BarcodeScanService.scanBarcode(context, loadCartDetails);
+            
+                  BarcodeScanService.scanBarcode(context, ()=> setState(() {
+                            loadCartDetails(); // Refresh cart details
+                          }));
                 },
               ),
               SizedBox(width: 10),
@@ -458,8 +465,7 @@ class _CartScreenState extends State<CartScreen> {
                                   onPressed: () async {
                                     await CartManager.deleteItem(productId,
                                         isLocal:
-                                            FirebaseAuth.instance.currentUser ==
-                                                null);
+                                            CartManager.getCartItems().isNotEmpty);
                                     setState(() {
                                       cartDetails.remove(productId);
                                       loadCartDetails();
@@ -477,13 +483,11 @@ class _CartScreenState extends State<CartScreen> {
                                       icon: Icon(Icons.remove),
                                       onPressed: () async {
                                         await CartManager.removeItem(productId,
-                                            isLocal: FirebaseAuth
-                                                    .instance.currentUser ==
-                                                null);
+                                            isLocal: CartManager.getCartItems()
+                                                .isNotEmpty);
                                         setState(() {
-                                          if (FirebaseAuth.instance
-                                                          .currentUser ==
-                                                      null &&
+                                          if (CartManager.getCartItems()
+                                                      .isNotEmpty &&
                                                   CartManager.getCartItems()[
                                                           productId] ==
                                                       null ||
@@ -504,9 +508,8 @@ class _CartScreenState extends State<CartScreen> {
                                       icon: Icon(Icons.add),
                                       onPressed: () async {
                                         await CartManager.addItem(productId,
-                                            isLocal: FirebaseAuth
-                                                    .instance.currentUser ==
-                                                null);
+                                            isLocal: CartManager.getCartItems()
+                                                .isNotEmpty);
                                         setState(() {
                                           loadCartDetails(); // Refresh cart details
                                         });

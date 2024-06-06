@@ -8,7 +8,7 @@ class CartManager {
   static Future<void> addItem(String productId, {bool isLocal = true}) async {
     if (isLocal) {
       if (await _hasDbCart()) {
-        print('Empty your online cart before adding items locally.');
+        throw('Empty your online cart before adding items locally.');
         return;
       }
       if (_localCartItems.containsKey(productId)) {
@@ -20,7 +20,7 @@ class CartManager {
           'Added to local cart: $productId, quantity: ${_localCartItems[productId]}');
     } else {
       if (_localCartItems.isNotEmpty) {
-        print('Empty your local cart before adding items online.');
+        throw('Empty your local cart before adding items online.');
         return;
       }
       await _addToDbCart(productId);

@@ -120,11 +120,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           );
                           return;
                         }
-                        await CartManager.addItem(widget.productId,
+                        try{
+                          await CartManager.addItem(widget.productId,
                             isLocal: false);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Added to cart')),
-                        );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Added to cart')),
+                          );
+                        }catch(e){
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString())),
+                          );
+                        }
+                    
                       },
                       child: Text('Add to the cart',
                           style: TextStyle(color: Colors.white)),
