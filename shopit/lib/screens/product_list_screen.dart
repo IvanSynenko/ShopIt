@@ -103,17 +103,24 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8))),
                     onPressed: () {
                       sortProducts(!isAscending);
                     },
                     child: Text(
-                        isAscending ? 'Sort by Price ↑' : 'Sort by Price ↓'),
+                        isAscending ? 'Sort by Price ↑' : 'Sort by Price ↓',style: TextStyle(color: Colors.pink[800])),
                   ),
                   ElevatedButton(
+          style: ElevatedButton.styleFrom(
+ 
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8))),
                     onPressed: () {
                       _showFilterDialog();
                     },
-                    child: Text('Filter by Price'),
+                    child: Text('Filter by Price', style: TextStyle(color: Colors.pink[800]),),
                   ),
                 ],
               ),

@@ -124,6 +124,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Text('Sign Up'),
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white, backgroundColor: Colors.pink[800],
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8))
                       ),
                     ),
                   ],

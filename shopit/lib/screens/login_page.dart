@@ -74,6 +74,8 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text('Log In'),
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white, backgroundColor: Colors.pink[800],
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8))
                       ),
                     ),
                   ],

@@ -112,6 +112,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink[800],
                   padding: EdgeInsets.symmetric(vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8))
                 ),
                 onPressed: isSure && !isLoading
                     ? () async {

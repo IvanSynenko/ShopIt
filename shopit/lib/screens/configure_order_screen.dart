@@ -407,7 +407,9 @@ class _ConfigureOrderScreenState extends State<ConfigureOrderScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 20.0),
                 child: ElevatedButton(
                   style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
+                      ElevatedButton.styleFrom(backgroundColor: Colors.pink[800],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8))),
                   onPressed: () {
                     _placeOrder();
                   },

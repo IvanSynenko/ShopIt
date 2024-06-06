@@ -330,7 +330,9 @@ class _DeliveryAddressPickerScreenState
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8))),
                 onPressed: _confirmLocation,
                 child: Text('Confirm Location',
                     style: TextStyle(color: Colors.white)),

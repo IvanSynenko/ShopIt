@@ -138,7 +138,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800],
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8))),
               onPressed: changePassword,
               child:
                   Text('Save changes', style: TextStyle(color: Colors.white)),

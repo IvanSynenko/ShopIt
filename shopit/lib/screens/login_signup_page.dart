@@ -146,6 +146,8 @@ class LoginSignupPage extends StatelessWidget {
               label: Text('Log in with Google'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black, backgroundColor: Colors.grey[300],
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8))
               ),
             ),
           ],

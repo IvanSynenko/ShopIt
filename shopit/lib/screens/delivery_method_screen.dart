@@ -78,7 +78,7 @@ class _DeliveryMethodScreenState extends State<DeliveryMethodScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Text('Delivery method', style: TextStyle(fontSize: 20)),
             ),
-            Divider(color: Colors.grey),
+            Divider(color: Colors.grey[350]),
             _buildDeliveryOption(
               'Pick up at a store',
               'Free',
@@ -91,7 +91,7 @@ class _DeliveryMethodScreenState extends State<DeliveryMethodScreen> {
                 });
               },
             ),
-            Divider(color: Colors.grey),
+            Divider(color: Colors.grey[350]),
             _buildDeliveryOption(
               'Pick up at a delivery point',
               'Carrier tariffs',
@@ -104,7 +104,7 @@ class _DeliveryMethodScreenState extends State<DeliveryMethodScreen> {
                 });
               },
             ),
-            Divider(color: Colors.grey),
+            Divider(color: Colors.grey[350]),
             _buildDeliveryOption(
               'Home delivery',
               'Carrier tariffs',
@@ -122,7 +122,7 @@ class _DeliveryMethodScreenState extends State<DeliveryMethodScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Text('Delivery service', style: TextStyle(fontSize: 20)),
             ),
-            Divider(color: Colors.grey),
+            Divider(color: Colors.grey[350]),
             if (_selectedDeliveryMethod == 'Pick up at a store') ...[
               _buildServiceOption(
                 'Pick up at a store',
@@ -155,7 +155,9 @@ class _DeliveryMethodScreenState extends State<DeliveryMethodScreen> {
                 child: ElevatedButton(
                   onPressed: _pickDeliveryAddress,
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300]),
+                      backgroundColor: Colors.grey[300],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8))),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -206,7 +208,7 @@ class _DeliveryMethodScreenState extends State<DeliveryMethodScreen> {
           ),
           onTap: onTap,
         ),
-        Divider(color: Colors.grey),
+        Divider(color: Colors.grey[350]),
       ],
     );
   }

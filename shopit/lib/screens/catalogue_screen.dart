@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../utils/db_utils.dart';
 import '../widgets/category_item.dart';
-
+import 'product_list_screen.dart';
 class CatalogueScreen extends StatefulWidget {
   @override
   _CatalogueScreenState createState() => _CatalogueScreenState();
@@ -10,13 +10,26 @@ class CatalogueScreen extends StatefulWidget {
 
 class _CatalogueScreenState extends State<CatalogueScreen> {
   List<Map<String, dynamic>> categories = [];
-
+TextEditingController searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     loadCategories();
   }
-
+void searchProducts(String query) async {
+    if (query.isNotEmpty) {
+      var results = await DatabaseUtils.searchProducts(query);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductListScreen(
+            subcategoryId: '',
+            searchResults: results,
+          ),
+        ),
+      );
+    }
+  }
   void loadCategories() async {
     categories = await DatabaseUtils.fetchCategories();
     setState(() {});
@@ -44,13 +57,27 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search),
-                    SizedBox(width: 8),
-                    Text('Search for goods'),
-                  ],
-                ),
+                
+                  child: Row(
+                    children: [
+                      Icon(Icons.search),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          controller: searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search for goods',
+                            border: InputBorder.none,
+                          ),
+                          onSubmitted: searchProducts,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.search),
+                        onPressed: () => searchProducts(searchController.text),
+                      ),
+                    ],
+                  )
               ),
             ),
             ...categories.map((category) {

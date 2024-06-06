@@ -130,6 +130,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pink[800],
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8))
                       ),
                     ),
                 ],

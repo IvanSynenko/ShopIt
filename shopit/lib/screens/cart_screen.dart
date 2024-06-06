@@ -377,7 +377,7 @@ class _CartScreenState extends State<CartScreen> {
               ElevatedButton.icon(
                 icon: Icon(Icons.qr_code_scanner, color: Colors.white),
                 label: Text('Scan', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800],shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                 onPressed: () {
                   BarcodeScanService.scanBarcode(context, loadCartDetails);
                 },
@@ -386,7 +386,9 @@ class _CartScreenState extends State<CartScreen> {
               ElevatedButton.icon(
                 icon: Icon(Icons.add, color: Colors.white),
                 label: Text('Add', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8))),
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
@@ -539,13 +541,14 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          padding: const EdgeInsets.symmetric( vertical: 30.0),
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800],shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            
             onPressed: () {
               proceedToConfigureOrder();
             },
-            child: Text('Checkout', style: TextStyle(color: Colors.white)),
+            child: Text('Checkout', style: TextStyle(color: Colors.white, fontSize: 20)),
           ),
         ),
       ],
