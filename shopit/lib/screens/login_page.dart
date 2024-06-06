@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home_page.dart'; // Import the HomePage
-
+import '../main.dart';
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -23,11 +23,8 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage(initialIndex: 3)),
-        (Route<dynamic> route) => false,
-      );
+      navigatorKey.currentState!.pushNamedAndRemoveUntil(
+          '/startingPage', (Route<dynamic> route) => false);
 
     } catch (e) {
       print(e);

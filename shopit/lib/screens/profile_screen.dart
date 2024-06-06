@@ -8,7 +8,10 @@ import 'home_page.dart';
 import 'purchase_history_screen.dart';
 import 'manage_account_screen.dart';
 import 'notifications_page.dart';
+import '../main.dart';
 class ProfileScreen extends StatelessWidget {
+
+
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
@@ -150,11 +153,8 @@ class ProfileScreen extends StatelessWidget {
           }),
           buildProfileOption(Icons.logout, 'Logout', onTap: () async {
             await FirebaseAuth.instance.signOut();
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => StartingPage()),
-              (Route<dynamic> route) => false,
-            );
+            navigatorKey.currentState!.pushNamedAndRemoveUntil(
+                '/startingPage', (Route<dynamic> route) => false);
 
           }),
         ],

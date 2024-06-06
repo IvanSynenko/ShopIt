@@ -5,7 +5,7 @@ import '../utils/db_utils.dart';
 import 'home_page.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
-
+import '../main.dart';
 class SignUpPage extends StatefulWidget {
   final String? email;
 
@@ -58,11 +58,8 @@ class _SignUpPageState extends State<SignUpPage> {
       );
       await conn.close();
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage(initialIndex: 3)),
-        (Route<dynamic> route) => false,
-      );
+      navigatorKey.currentState!.pushNamedAndRemoveUntil(
+          '/startingPage', (Route<dynamic> route) => false);
 
     } catch (e) {
       print(e);
