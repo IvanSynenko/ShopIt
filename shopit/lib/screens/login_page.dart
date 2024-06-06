@@ -23,13 +23,12 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-            builder: (context) => HomePage(
-                initialIndex:
-                    3)), // Navigate to the HomePage on successful login
+        MaterialPageRoute(builder: (context) => HomePage(initialIndex: 3)),
+        (Route<dynamic> route) => false,
       );
+
     } catch (e) {
       print(e);
       // Handle errors here

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopit/screens/bonus_program_screen.dart';
+import 'package:shopit/screens/starting_page.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
@@ -149,10 +150,12 @@ class ProfileScreen extends StatelessWidget {
           }),
           buildProfileOption(Icons.logout, 'Logout', onTap: () async {
             await FirebaseAuth.instance.signOut();
-            Navigator.pushReplacement(
+            Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) => StartingPage()),
+              (Route<dynamic> route) => false,
             );
+
           }),
         ],
       ),

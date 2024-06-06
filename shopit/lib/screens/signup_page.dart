@@ -58,13 +58,12 @@ class _SignUpPageState extends State<SignUpPage> {
       );
       await conn.close();
 
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-            builder: (context) => HomePage(
-                initialIndex:
-                    3)), // Navigate to the HomePage on successful signup
+        MaterialPageRoute(builder: (context) => HomePage(initialIndex: 3)),
+        (Route<dynamic> route) => false,
       );
+
     } catch (e) {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(

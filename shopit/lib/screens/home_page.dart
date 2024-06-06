@@ -38,6 +38,13 @@ class _HomePageState extends State<HomePage> {
     ProfileScreen(),
   ];
 
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+  ];
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -45,76 +52,80 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget getCurrentScreen() {
-    if (_selectedIndex == 1 && Navigator.canPop(context)) {
-      return Navigator(
-        onGenerateRoute: (settings) {
-          WidgetBuilder builder;
-          switch (settings.name) {
-            case '/':
-              builder = (context) => CatalogueScreen();
-              break;
-            case '/subcategory':
-              builder = (context) => SubCategoryScreen(
-                    categoryId: settings.arguments as String,
-                  );
-              break;
-            case '/productList':
-              builder = (context) => ProductListScreen(
-                    subcategoryId: settings.arguments as String,
-                  );
-              break;
-            case '/productDetail':
-              builder = (context) => ProductDetailScreen(
-                    productId: settings.arguments as String,
-                  );
-              break;
-            default:
-              throw Exception('Invalid route: ${settings.name}');
-          }
-          return MaterialPageRoute(builder: builder);
-        },
-      );
-    } else if (_selectedIndex == 3 && Navigator.canPop(context)) {
-      return Navigator(
-        onGenerateRoute: (settings) {
-          WidgetBuilder builder;
-          switch (settings.name) {
-            case '/':
-              builder = (context) => ProfileScreen();
-              break;
-            case '/purchaseHistory':
-              builder = (context) => PurchaseHistoryScreen();
-              break;
-            case '/manageAccount':
-              builder = (context) => ManageAccountScreen();
-              break;
-            case '/bonusProgram':
-              builder = (context) => BonusProgramScreen();
-              break;
-            case '/changeEmail':
-              builder = (context) => ChangeEmailScreen();
-              break;
-            case '/changePassword':
-              builder = (context) => ChangePasswordScreen();
-              break;
-            case '/changeLanguage':
-              builder = (context) => ChangeLanguageScreen();
-              break;
-            case '/deleteAccount':
-              builder = (context) => DeleteAccountScreen();
-              break;
-             case '/notifications':
-              builder = (context) => NotificationsPage();
-              break; 
-            default:
-              throw Exception('Invalid route: ${settings.name}');
-          }
-          return MaterialPageRoute(builder: builder);
-        },
-      );
-    } else {
-      return _widgetOptions.elementAt(_selectedIndex);
-    }
+    return IndexedStack(
+      index: _selectedIndex,
+      children: [
+        _widgetOptions.elementAt(0),
+        Navigator(
+          key: _navigatorKeys[1],
+          onGenerateRoute: (settings) {
+            WidgetBuilder builder;
+            switch (settings.name) {
+              case '/':
+                builder = (context) => CatalogueScreen();
+                break;
+              case '/subcategory':
+                builder = (context) => SubCategoryScreen(
+                      categoryId: settings.arguments as String,
+                    );
+                break;
+              case '/productList':
+                builder = (context) => ProductListScreen(
+                      subcategoryId: settings.arguments as String,
+                    );
+                break;
+              case '/productDetail':
+                builder = (context) => ProductDetailScreen(
+                      productId: settings.arguments as String,
+                    );
+                break;
+              default:
+                throw Exception('Invalid route: ${settings.name}');
+            }
+            return MaterialPageRoute(builder: builder);
+          },
+        ),
+        _widgetOptions.elementAt(2),
+        Navigator(
+          key: _navigatorKeys[3],
+          onGenerateRoute: (settings) {
+            WidgetBuilder builder;
+            switch (settings.name) {
+              case '/':
+                builder = (context) => ProfileScreen();
+                break;
+              case '/purchaseHistory':
+                builder = (context) => PurchaseHistoryScreen();
+                break;
+              case '/manageAccount':
+                builder = (context) => ManageAccountScreen();
+                break;
+              case '/bonusProgram':
+                builder = (context) => BonusProgramScreen();
+                break;
+              case '/changeEmail':
+                builder = (context) => ChangeEmailScreen();
+                break;
+              case '/changePassword':
+                builder = (context) => ChangePasswordScreen();
+                break;
+              case '/changeLanguage':
+                builder = (context) => ChangeLanguageScreen();
+                break;
+              case '/deleteAccount':
+                builder = (context) => DeleteAccountScreen();
+                break;
+              case '/notifications':
+                builder = (context) => NotificationsPage();
+                break;
+              default:
+                throw Exception('Invalid route: ${settings.name}');
+            }
+            return MaterialPageRoute(builder: builder);
+          },
+        ),
+      ],
+    );
   }
 
   @override
