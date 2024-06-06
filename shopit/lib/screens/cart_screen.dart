@@ -181,6 +181,29 @@ class _CartScreenState extends State<CartScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Payment successful!')),
             );
+            if (user != null) {
+              final conn = await DatabaseUtils.connect();
+              double bonusPoints = totalPrice * 10;
+              try {
+                // Update user bonus account
+                await conn.execute(
+                  Sql.named(
+                      'UPDATE public."User" SET "userBonusAccount" = COALESCE("userBonusAccount", 0) + @bonusPoints WHERE "userId" = @userId'),
+                  parameters: {
+                    'bonusPoints': bonusPoints,
+                    'userId': user.uid,
+                  },
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(
+                          'Error updating bonus account: ${e.toString()}')),
+                );
+              } finally {
+                await conn.close();
+              }
+            }
             // Insert order
             var orderIdResult = await conn.execute(
               Sql.named(
@@ -354,7 +377,7 @@ class _CartScreenState extends State<CartScreen> {
               ElevatedButton.icon(
                 icon: Icon(Icons.qr_code_scanner, color: Colors.white),
                 label: Text('Scan', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
                 onPressed: () {
                   BarcodeScanService.scanBarcode(context, loadCartDetails);
                 },
@@ -363,7 +386,7 @@ class _CartScreenState extends State<CartScreen> {
               ElevatedButton.icon(
                 icon: Icon(Icons.add, color: Colors.white),
                 label: Text('Add', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
@@ -518,7 +541,7 @@ class _CartScreenState extends State<CartScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
             onPressed: () {
               proceedToConfigureOrder();
             },

@@ -66,7 +66,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           });
           Navigator.pop(context);
         },
-        activeColor: Colors.purple,
+        activeColor: Colors.pink[800],
       ),
       onTap: () {
         setState(() {

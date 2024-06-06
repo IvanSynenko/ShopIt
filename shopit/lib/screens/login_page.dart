@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: _loginUser,
                       child: Text('Log In'),
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white, backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white, backgroundColor: Colors.pink[800],
                       ),
                     ),
                   ],

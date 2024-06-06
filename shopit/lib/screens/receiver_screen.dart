@@ -88,7 +88,7 @@ class _ReceiverScreenState extends State<ReceiverScreen> {
             ElevatedButton(
               onPressed: _submit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
+                backgroundColor: Colors.pink[800],
               ),
               child: Text('Change', style: TextStyle(color: Colors.white)),
             ),

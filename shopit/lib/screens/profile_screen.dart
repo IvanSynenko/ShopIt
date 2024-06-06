@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shopit/screens/bonus_program_screen.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
-
+import 'purchase_history_screen.dart';
+import 'manage_account_screen.dart';
+import 'notifications_page.dart';
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -33,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ),
-          Icon(Icons.account_circle, size: 100, color: Colors.purple),
+          Icon(Icons.account_circle, size: 100, color: Colors.pink[800]),
           SizedBox(height: 10),
           Text(
             'Log in or sign up to order online and participate in the bonus program',
@@ -52,7 +55,8 @@ class ProfileScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, backgroundColor: Colors.purple,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.pink[800],
                 ),
                 child: Text('Log In'),
               ),
@@ -65,7 +69,8 @@ class ProfileScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, backgroundColor: Colors.purple,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.pink[800],
                 ),
                 child: Text('Sign Up'),
               ),
@@ -98,7 +103,7 @@ class ProfileScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Icon(Icons.account_circle, size: 50, color: Colors.purple),
+                Icon(Icons.account_circle, size: 50, color: Colors.pink[800]),
                 SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,10 +117,32 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
           ),
-          buildProfileOption(Icons.update, 'Purchase history'),
-          buildProfileOption(Icons.loyalty, 'Bonus program'),
-          buildProfileOption(Icons.notifications, 'Notifications'),
-          buildProfileOption(Icons.manage_accounts, 'Manage account'),
+          buildProfileOption(Icons.update, 'Purchase history', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PurchaseHistoryScreen()),
+            );
+          }),
+          buildProfileOption(Icons.loyalty, 'Bonus program', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BonusProgramScreen()),
+            );
+          }
+          ),
+          buildProfileOption(Icons.notifications, 'Notifications', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NotificationsPage()),
+            );
+          }),
+          buildProfileOption(Icons.manage_accounts, 'Manage account',
+              onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ManageAccountScreen()),
+            );
+          }),
           buildProfileOption(Icons.logout, 'Logout', onTap: () async {
             await FirebaseAuth.instance.signOut();
             Navigator.pushReplacement(
@@ -130,19 +157,20 @@ class ProfileScreen extends StatelessWidget {
 
   Widget buildProfileOption(IconData icon, String text, {VoidCallback? onTap}) {
     return Padding(
-      padding: const EdgeInsets.symmetric( vertical: 18.0),
+      padding: const EdgeInsets.symmetric(vertical: 18.0),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 255, 239, 244), // Very light pink background
+            color: const Color.fromARGB(
+                255, 255, 239, 244), // Very light pink background
           ),
           child: Row(
             children: [
               SizedBox(width: 15),
-              Icon(icon, color: Colors.purple),
+              Icon(icon, color: Colors.pink[800]),
               SizedBox(width: 22),
               Text(text, style: TextStyle(fontSize: 16)),
             ],

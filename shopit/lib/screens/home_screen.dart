@@ -122,7 +122,7 @@ void searchProducts(String query) async {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.barcode_reader, color: Colors.purple),
+                        Icon(Icons.barcode_reader, color: Colors.pink[800]),
                         SizedBox(width: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +172,7 @@ void searchProducts(String query) async {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.location_on, color: Colors.purple),
+                              Icon(Icons.location_on, color: Colors.pink[800]),
                               SizedBox(width: 8),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

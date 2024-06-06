@@ -123,7 +123,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       onPressed: _signUpUser,
                       child: Text('Sign Up'),
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white, backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white, backgroundColor: Colors.pink[800],
                       ),
                     ),
                   ],

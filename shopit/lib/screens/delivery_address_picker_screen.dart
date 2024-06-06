@@ -318,7 +318,7 @@ class _DeliveryAddressPickerScreenState
                         right: 10,
                         child: FloatingActionButton(
                           mini: true,
-                          backgroundColor: Colors.purple,
+                          backgroundColor: Colors.pink[800],
                           onPressed: _centerMap,
                           child: Icon(Icons.my_location, color: Colors.white),
                         ),
@@ -330,7 +330,7 @@ class _DeliveryAddressPickerScreenState
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
                 onPressed: _confirmLocation,
                 child: Text('Confirm Location',
                     style: TextStyle(color: Colors.white)),

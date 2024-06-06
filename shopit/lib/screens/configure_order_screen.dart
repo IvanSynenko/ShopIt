@@ -244,7 +244,31 @@ class _ConfigureOrderScreenState extends State<ConfigureOrderScreen> {
         ],
         note: "Contact us for any questions on your order.",
         onSuccess: (Map params) async {
+          User? user = FirebaseAuth.instance.currentUser;
           print("onSuccess: $params");
+          if (user != null) {
+            final conn = await DatabaseUtils.connect();
+            double bonusPoints = totalPrice * 10;
+            try {
+              // Update user bonus account
+              await conn.execute(
+                Sql.named(
+                    'UPDATE public."User" SET "userBonusAccount" = COALESCE("userBonusAccount", 0) + @bonusPoints WHERE "userId" = @userId'),
+                parameters: {
+                  'bonusPoints': bonusPoints,
+                  'userId': user.uid,
+                },
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content:
+                        Text('Error updating bonus account: ${e.toString()}')),
+              );
+            } finally {
+              await conn.close();
+            }
+          }
           clearCartAndRefresh();
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -383,7 +407,7 @@ class _ConfigureOrderScreenState extends State<ConfigureOrderScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 20.0),
                 child: ElevatedButton(
                   style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                      ElevatedButton.styleFrom(backgroundColor: Colors.pink[800]),
                   onPressed: () {
                     _placeOrder();
                   },
@@ -431,7 +455,7 @@ class _ConfigureOrderScreenState extends State<ConfigureOrderScreen> {
               alignment: Alignment.bottomRight,
               child: TextButton(
                 onPressed: onChange,
-                child: Text('Change', style: TextStyle(color: Colors.purple)),
+                child: Text('Change', style: TextStyle(color: Colors.pink[800])),
               ),
             ),
           ],

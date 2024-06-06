@@ -6,7 +6,14 @@ import 'profile_screen.dart';
 import 'subcategory_screen.dart';
 import 'product_list_screen.dart';
 import 'product_detail_screen.dart';
-
+import 'purchase_history_screen.dart';
+import 'manage_account_screen.dart';
+import 'bonus_program_screen.dart';
+import 'change_email_screen.dart';
+import 'change_password_screen.dart';
+import 'change_language_screen.dart';
+import 'delete_account_screen.dart';
+import 'notifications_page.dart';
 class HomePage extends StatefulWidget {
   final int initialIndex;
   HomePage({this.initialIndex = 0});
@@ -61,6 +68,44 @@ class _HomePageState extends State<HomePage> {
                     productId: settings.arguments as String,
                   );
               break;
+            default:
+              throw Exception('Invalid route: ${settings.name}');
+          }
+          return MaterialPageRoute(builder: builder);
+        },
+      );
+    } else if (_selectedIndex == 3 && Navigator.canPop(context)) {
+      return Navigator(
+        onGenerateRoute: (settings) {
+          WidgetBuilder builder;
+          switch (settings.name) {
+            case '/':
+              builder = (context) => ProfileScreen();
+              break;
+            case '/purchaseHistory':
+              builder = (context) => PurchaseHistoryScreen();
+              break;
+            case '/manageAccount':
+              builder = (context) => ManageAccountScreen();
+              break;
+            case '/bonusProgram':
+              builder = (context) => BonusProgramScreen();
+              break;
+            case '/changeEmail':
+              builder = (context) => ChangeEmailScreen();
+              break;
+            case '/changePassword':
+              builder = (context) => ChangePasswordScreen();
+              break;
+            case '/changeLanguage':
+              builder = (context) => ChangeLanguageScreen();
+              break;
+            case '/deleteAccount':
+              builder = (context) => DeleteAccountScreen();
+              break;
+             case '/notifications':
+              builder = (context) => NotificationsPage();
+              break; 
             default:
               throw Exception('Invalid route: ${settings.name}');
           }

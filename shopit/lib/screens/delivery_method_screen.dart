@@ -183,7 +183,7 @@ class _DeliveryMethodScreenState extends State<DeliveryMethodScreen> {
         onChanged: (value) {
           onTap();
         },
-        activeColor: Colors.purple,
+        activeColor: Colors.pink[800],
       ),
       onTap: onTap,
     );
@@ -202,7 +202,7 @@ class _DeliveryMethodScreenState extends State<DeliveryMethodScreen> {
             onChanged: (value) {
               onTap();
             },
-            activeColor: Colors.purple,
+            activeColor: Colors.pink[800],
           ),
           onTap: onTap,
         ),
