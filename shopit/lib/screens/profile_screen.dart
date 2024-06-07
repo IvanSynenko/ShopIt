@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shopit/screens/bonus_program_screen.dart';
-import 'package:shopit/screens/starting_page.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
-import 'home_page.dart';
 import 'purchase_history_screen.dart';
 import 'manage_account_screen.dart';
 import 'notifications_page.dart';

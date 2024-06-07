@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/db_utils.dart';
-import 'package:flutter/services.dart';
 import 'package:postgres/postgres.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';

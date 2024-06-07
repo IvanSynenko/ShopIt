@@ -9,7 +9,6 @@ class CartManager {
     if (isLocal) {
       if (await _hasDbCart()) {
         throw('Empty your online cart before adding items locally.');
-        return;
       }
       if (_localCartItems.containsKey(productId)) {
         _localCartItems[productId] = _localCartItems[productId]! + 1;
@@ -21,7 +20,6 @@ class CartManager {
     } else {
       if (_localCartItems.isNotEmpty) {
         throw('Empty your local cart before adding items online.');
-        return;
       }
       await _addToDbCart(productId);
     }
